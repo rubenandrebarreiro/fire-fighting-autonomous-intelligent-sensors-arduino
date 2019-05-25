@@ -17,7 +17,8 @@
 #include <SoftwareSerial.h>
 #include "dht.h"
 
-const String SENSOR_ID = "fire-fighting-sensor-" + random(10);
+const String SENSOR_ID = "fire-fighting-sensor-00";
+//const String SENSOR_ID = "fire-fighting-sensor-" + random(10);
 
 const int IDLE_SUCCESS_CONNECTION_STATUS_1 = 1;
 const int IDLE_SUCCESS_CONNECTION_STATUS_2 = 51; 
@@ -53,6 +54,33 @@ const int temperatureDHTYellowAlertThreshold = 35;
 const int temperatureDHTOrangeAlertThreshold = 40;
 const int temperatureDHTRedAlertThreshold = 45;
 
+const String MSG_FIRE_ALERT = "FIRE ALERT!!! MAYDAY, MAYDAY, MAYDAY!!!";
+
+const String MSG_CURRENT_DATA_MEASURED_FLAME_SENSOR_1 = "Current Data Measured: [Flame Intensity = ";
+const String MSG_CURRENT_DATA_MEASURED_FLAME_SENSOR_2 = "]";
+
+const String MSG_RED_ALERT = "RED ALERT - IMMINENT OCCURENCE OF FIRE ALERT!!!";
+const String MSG_ORANGE_ALERT = "ORANGE ALERT - VERY POSSIBLE OCCURENCE OF FIRE ALERT!!!"
+const String MSG_YELLOW_ALERT = "YELLOW ALERT - POSSIBLE OCCURENCE OF FIRE ALERT!!!"
+const String MSG_IDLE_STATUS = "IDLE STATUS - READING...";
+
+const String MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_1 = "Current Data Measured: [Temperature = ";
+const String MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_2 = "; Humidity = ";
+const String MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_3 = "]";
+
+const String MSG_REGISTER_ITSELF_INFO_1 = "Sensor's Registration Info: [";
+const String MSG_REGISTER_ITSELF_INFO_2 = "]";
+const String MSG_REGISTER_ITSELF_INFO_3 = "SENDING SENSOR'S REGISTRATION INFO...";
+
+const String MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_1 = "Data Measurement/Reading: [";
+const String MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_2 = "]";
+const String MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_3 = "SENDING FLAME MEASUREMENT/READING...";
+
+const String MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_1 = "Data Measurement/Reading: [";
+const String MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_2 = " , ";
+const String MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_3 = "]";
+const String MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_4 = "SENDING DHT MEASUREMENT/READING...";
+
 dht DHT;
 
 // RX (Receive) = 2, TX (Transmit) = 3
@@ -86,6 +114,8 @@ void setup() {
   lastTemperatureDHTMeasuredValue = DHT.temperature;
   lastHumidityDHTMeasuredValue = DHT.humidity;
 
+  sendRegisterItselfInfo();
+  
 }
 
 void loop() {
@@ -113,13 +143,15 @@ void tryToDetectFire() {
   int flameSensorMeasuredValue = analogRead(FLAME_PIN);
  
   while(flameSensorMeasuredValue > flameSensorThreshold) {
-    Serial.println("FIRE ALERT!!! MAYDAY, MAYDAY, MAYDAY!!!");
+    Serial.println(MSG_FIRE_ALERT);
   
-    Serial.print("Current Data Measured: [Flame Intensity = ");
+    Serial.print(MSG_CURRENT_DATA_MEASURED_FLAME_SENSOR_1);
     Serial.print(flameSensorMeasuredValue);
-    Serial.println("]");
+    Serial.println(MSG_CURRENT_DATA_MEASURED_FLAME_SENSOR_2);
     
     fireAlert();
+    sendFireAlert(flameSensorMeasuredValue);
+    
     flameSensorMeasuredValue = analogRead(FLAME_PIN);
   }
   
@@ -136,28 +168,28 @@ void performMeasurementsOrReadings() {
   sendMeasurementOrReading(temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
   
   if(( DHT.temperature >= temperatureDHTRedAlertThreshold) || ( (lastTemperatureDHTMeasuredValue >= temperatureDHTRedAlertThreshold) && ((lastTemperatureDHTMeasuredValue + DHT.temperature) < 0) ) ) {
-   Serial.println("RED ALERT - IMMINENT OCCURENCE OF FIRE ALERT!!!");
+   Serial.println(MSG_RED_ALERT);
    imminentOccurrenceFireAlert();
   }
   else if(( DHT.temperature >= temperatureDHTOrangeAlertThreshold) || ( (lastTemperatureDHTMeasuredValue >= temperatureDHTOrangeAlertThreshold) && ((lastTemperatureDHTMeasuredValue + DHT.temperature) < 0) ) ) {
-    Serial.println("ORANGE ALERT - VERY POSSIBLE OCCURENCE OF FIRE ALERT!!!");
+    Serial.println(MSG_ORANGE_ALERT);
     veryPossibleOccurrenceFireAlert();
   }
   else if(( DHT.temperature >= temperatureDHTYellowAlertThreshold) || ( (lastTemperatureDHTMeasuredValue >= temperatureDHTYellowAlertThreshold) && ((lastTemperatureDHTMeasuredValue + DHT.temperature) < 0) ) ) {
-    Serial.println("YELLOW ALERT - POSSIBLE OCCURENCE OF FIRE ALERT!!!");
+    Serial.println(MSG_YELLOW_ALERT);
     possibleOccurrenceFireAlert();
   }
   else {
-    Serial.println("IDLE STATUS - READING...");
+    Serial.println(MSG_IDLE_STATUS);
     IdleState();
   }
 
   // Just for debug
-  Serial.print("Current Data Measured: [Temperature = ");
+  Serial.print(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_1);
   Serial.print(temperatureDHTMeasuredValue);
-  Serial.print("; Humidity = ");
+  Serial.print(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_2);
   Serial.print(humidityDHTMeasuredValue);
-  Serial.println("]");
+  Serial.println(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_3);
 
   lastTemperatureDHTMeasuredValue = temperatureDHTMeasuredValue;
   lastHumidityDHTMeasuredValue = humidityDHTMeasuredValue;
@@ -166,24 +198,43 @@ void performMeasurementsOrReadings() {
 
 }
 
-// TODO
-void sendFireAlert(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
+void sendRegisterItselfInfo() {
   
-  String measurementReadingToSend = "Data Measurement/Reading: [" + String(temperatureDHTMeasuredValue) + " , " + String(humidityDHTMeasuredValue) + "]";
+  String registerItselfInfoToSend = MSG_REGISTER_ITSELF_INFO_1 + SENSOR_ID + MSG_REGISTER_ITSELF_INFO_2;
 
-  Serial.print("SENDING MEASUREMENT/READING...");
+  Serial.print(MSG_REGISTER_ITSELF_INFO_3);
   
-  sendDataStringToWiFiModule(1, measurementReadingToSend);
+  sendDataStringToWiFiModule(0, registerItselfInfoToSend);
+
+}
+
+void sendYellowAlert(int flameSensorMeasuredValue) {
+  
+  String measurementReadingToSend = MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_1 + String(flameSensorMeasuredValue) + MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_2;
+
+  Serial.print(MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_3);
+  
+  sendDataStringToWiFiModule(1, flameSensorMeasuredValue);
+
+}
+
+void sendFireAlert(int flameSensorMeasuredValue) {
+  
+  String measurementReadingToSend = MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_1 + String(flameSensorMeasuredValue) + MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_2;
+
+  Serial.print(MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_3);
+  
+  sendDataStringToWiFiModule(1, flameSensorMeasuredValue);
 
 }
 
 void sendMeasurementOrReading(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
   
-  String measurementReadingToSend = "Data Measurement/Reading: [" + String(temperatureDHTMeasuredValue) + " , " + String(humidityDHTMeasuredValue) + "]";
+  String measurementReadingToSend = MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_1 + String(temperatureDHTMeasuredValue) + MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_2 + String(humidityDHTMeasuredValue) + MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_3;
 
-  Serial.print("SENDING MEASUREMENT/READING...");
+  Serial.print(MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_4);
   
-  sendDataStringToWiFiModule(1, measurementReadingToSend);
+  sendDataStringToWiFiModule(2, measurementReadingToSend);
 
 }
 
