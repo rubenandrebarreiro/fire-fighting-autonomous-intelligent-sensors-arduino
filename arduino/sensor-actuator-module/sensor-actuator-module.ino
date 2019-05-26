@@ -21,10 +21,7 @@ dht DHT;
 SoftwareSerial fireFightingSensorSerial(2, 3);
 
 unsigned long timeSinceLastSendingFireAlert;
-unsigned long timeSinceLastSendingYellowAlert;
-unsigned long timeSinceLastSendingOrangeAlert;
-unsigned long timeSinceLastSendingRedAlert;
-unsigned long timeSinceLastSendingIdleAlert;
+unsigned long timeSinceLastSendingMeasurementReading;
 
 int lastFlameSensorMeasuredValue;
 int lastTemperatureDHTMeasuredValue;
@@ -68,11 +65,7 @@ void setup() {
   sendRegisterItselfInfo();
 
   timeSinceLastSendingFireAlert = 0;
-  timeSinceLastSendingYellowAlert = 0;
-  timeSinceLastSendingOrangeAlert = 0;
-  timeSinceLastSendingRedAlert = 0;
-  timeSinceLastSendingIdleAlert = 0;
-  
+  timeSinceLastSendingMeasurementReading = 0;
 }
 
 void loop() {
@@ -110,7 +103,7 @@ void tryToDetectFire() {
     Serial.print(flameSensorMeasuredValue);
     Serial.println("]");
     
-    verifySendAlertMsg(5, flameSensorMeasuredValue, 0, 0);
+    verifySendAlertMsg(2, flameSensorMeasuredValue, 0, 0);
 
     fireAlert();
     
@@ -121,9 +114,7 @@ void tryToDetectFire() {
 }
 
 void performMeasurementsOrReadings() {
-
-  int flameSensorMeasuredValue = analogRead(A0);
-  
+   
   int checkDHTMeasuredValue = DHT.read11(7);
   int temperatureDHTMeasuredValue = DHT.temperature;
   int humidityDHTMeasuredValue = DHT.humidity;
@@ -135,8 +126,6 @@ void performMeasurementsOrReadings() {
    Serial.print(humidityDHTMeasuredValue);
    Serial.println("]");
 
-   verifySendAlertMsg(4, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-   
    imminentOccurrenceFireAlert();   
   }
   else if( (temperatureDHTMeasuredValue >= 40) || ( (lastTemperatureDHTMeasuredValue >= 40) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
@@ -145,9 +134,7 @@ void performMeasurementsOrReadings() {
    Serial.print("; Humidity = ");
    Serial.print(humidityDHTMeasuredValue);
    Serial.println("]");
-   
-   verifySendAlertMsg(3, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-    
+     
    veryPossibleOccurrenceFireAlert();
   }
   else if( (temperatureDHTMeasuredValue >= 35) || ( (lastTemperatureDHTMeasuredValue >= 35) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
@@ -157,23 +144,19 @@ void performMeasurementsOrReadings() {
     Serial.print(humidityDHTMeasuredValue);
     Serial.println("]");
 
-    verifySendAlertMsg(2, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-    
     possibleOccurrenceFireAlert();
   }
   else {
-    Serial.print("Current Data Measured: [Flame's IR = ");
-    Serial.print(flameSensorMeasuredValue);
-    Serial.print("; Temperature = ");
+    Serial.print("Current Data Measured: [Temperature = ");
     Serial.print(temperatureDHTMeasuredValue);
     Serial.print("; Humidity = ");
     Serial.print(humidityDHTMeasuredValue);
-    Serial.println("]");    
+    Serial.println("]");
     
-    verifySendAlertMsg(1, flameSensorMeasuredValue, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-    
-    idleStateAlert();
+    idleState();
   }
+
+  verifySendAlertMsg(1, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
 
   lastTemperatureDHTMeasuredValue = temperatureDHTMeasuredValue;
   lastHumidityDHTMeasuredValue = humidityDHTMeasuredValue;
@@ -191,58 +174,22 @@ void sendRegisterItselfInfo() {
   fireFightingSensorSerial.write(registerItselfInfoMsgToSend);
 }
 
-void verifySendAlertMsg(int alertType, int flameSensorMeasuredValue, int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
+void verifySendAlertMsg(int messageType, int flameSensorMeasuredValue, int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
 
-  // IDLE ALERT
-  if(alertType == 1) {
-    long timeOfIdleAlertOccurrence = 0;
+  // MEASUREMENT/READING
+  if(messageType == 1) {
+    long timeOfMeasurementReadingOccurrence = 0;
 
-    timeOfIdleAlertOccurrence = millis() - timeSinceLastSendingIdleAlert;
+    timeOfMeasurementReadingOccurrence = millis() - timeSinceLastSendingMeasurementReading;
 
-    if(timeOfIdleAlertOccurrence > 60000) {
-      sendIdleAlert(flameSensorMeasuredValue, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-      timeSinceLastSendingIdleAlert = millis();
-    }
-  }
-
-  // YELLOW ALERT
-  if(alertType == 2) {
-    long timeOfYellowAlertOccurrence = 0;
-
-    timeOfYellowAlertOccurrence = millis() - timeSinceLastSendingYellowAlert;
-
-    if(timeOfYellowAlertOccurrence > 7200000) {
-      sendYellowAlert(temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-      timeSinceLastSendingYellowAlert = millis();
-    }
-  }
-
-  // ORANGE ALERT
-  if(alertType == 3) {
-    long timeOfOrangeAlertOccurrence = 0;
-
-    timeOfOrangeAlertOccurrence = millis() - timeSinceLastSendingOrangeAlert;
-
-    if(timeOfOrangeAlertOccurrence > 3600000) {
-      sendOrangeAlert(temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-      timeSinceLastSendingOrangeAlert = millis();
-    }
-  }
-
-  // RED ALERT
-  if(alertType == 4) {
-    long timeOfRedAlertOccurrence = 0;
-
-    timeOfRedAlertOccurrence = millis() - timeSinceLastSendingRedAlert;
-
-    if(timeOfRedAlertOccurrence > 1800000) {
-      sendRedAlert(temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-      timeSinceLastSendingRedAlert = millis();
+    if(timeOfMeasurementReadingOccurrence > 60000) {
+      sendMeasurementReading(temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
+      timeSinceLastSendingMeasurementReading = millis();
     }
   }
 
   // FIRE ALERT
-  if(alertType == 5) {
+  if(messageType == 2) {
     
     long timeOfFireAlertOccurrence = 0;
 
@@ -255,50 +202,14 @@ void verifySendAlertMsg(int alertType, int flameSensorMeasuredValue, int tempera
   }
 }
 
-void sendIdleAlert(int flameSensorMeasuredValue, int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
+void sendMeasurementReading(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
   
-  char idleAlertMsgToSend[50];
+  char measurementReadingMsgToSend[50];
   
-  sprintf(idleAlertMsgToSend, "M%d - {[Flame's IR = %d; Temperature = %d; Humidity = %d}}",
-          1, flameSensorMeasuredValue, temperatureDHTMeasuredValue, humidityDHTMeasuredValue); 
+  sprintf(measurementReadingMsgToSend, "M%d - {[Temperature = %d; Humidity = %d}}",
+          1, temperatureDHTMeasuredValue, humidityDHTMeasuredValue); 
   
-  fireFightingSensorSerial.write(idleAlertMsgToSend);
-}
-
-void sendYellowAlert(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
-
-  char yellowAlertMsgToSend[50];
-  
-  sprintf(yellowAlertMsgToSend, "M%d - {[Temperature = %d; Humidity = %d]}",
-          2, temperatureDHTMeasuredValue, humidityDHTMeasuredValue); 
-           
-  Serial.println("SENDING YELLOW ALERT...");
-
-  fireFightingSensorSerial.write(yellowAlertMsgToSend);
-}
-
-void sendOrangeAlert(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
-  
-  char orangeAlertMsgToSend[50];
-  
-  sprintf(orangeAlertMsgToSend, "M%d - {[Temperature = %d; Humidity = %d]}",
-          3, temperatureDHTMeasuredValue, humidityDHTMeasuredValue); 
-           
-  Serial.println("SENDING ORANGE ALERT...");
-
-  fireFightingSensorSerial.write(orangeAlertMsgToSend);
-}
-
-void sendRedAlert(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
-  
-  char redAlertMsgToSend[50];
-  
-  sprintf(redAlertMsgToSend, "M%d - {[Temperature = %d; Humidity = %d]}",
-          4, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);  
-           
-  Serial.println("SENDING RED ALERT...");
-
-  fireFightingSensorSerial.write(redAlertMsgToSend);
+  fireFightingSensorSerial.write(measurementReadingMsgToSend);
 }
 
 
@@ -307,7 +218,7 @@ void sendFireAlert(int flameSensorMeasuredValue) {
   char fireAlertMsgToSend[50];
   
   sprintf(fireAlertMsgToSend, "M%d - {[Flame's IR = %d]}",
-          5, flameSensorMeasuredValue); 
+          2, flameSensorMeasuredValue); 
            
   Serial.println("SENDING FIRE ALERT...");
 
@@ -333,10 +244,9 @@ void connectionWiFiAlert() {
   tone(6, 1000, 10);
 
   delay(50);
-
 }
 
-void idleStateAlert() {
+void idleState() {
   
   // Green (turn just the GREEN LED on):
   digitalWrite(9, LOW);
@@ -355,7 +265,6 @@ void idleStateAlert() {
   tone(6, 100, 100);
 
   delay(2000);
-
 }
 
 void possibleOccurrenceFireAlert() {
@@ -377,7 +286,6 @@ void possibleOccurrenceFireAlert() {
   tone(6, 100, 100);
 
   delay(600);
-
 }
 
 void veryPossibleOccurrenceFireAlert() {
@@ -407,7 +315,6 @@ void veryPossibleOccurrenceFireAlert() {
   tone(6, 100, 100);
 
   delay(200);
-
 }
 
 void imminentOccurrenceFireAlert() {
@@ -429,7 +336,6 @@ void imminentOccurrenceFireAlert() {
   tone(6, 100, 100);
 
   delay(100);
-
 }
 
 void fireAlert() {
@@ -440,7 +346,6 @@ void fireAlert() {
   digitalWrite(11, LOW);
 
   tone(6, 10, 10000);
-
 }
 
 void turnOffAlert() {
@@ -449,5 +354,4 @@ void turnOffAlert() {
   digitalWrite(9, LOW);
   digitalWrite(10, LOW);
   digitalWrite(11, LOW);
-
 }

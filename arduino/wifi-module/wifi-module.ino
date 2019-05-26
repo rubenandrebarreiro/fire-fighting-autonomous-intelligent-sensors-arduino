@@ -12,43 +12,25 @@
  * 
  */
 
+#include <SoftwareSerial.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
-#include <SoftwareSerial.h>
-
 // Some available Networks to test:
-const String OPEN_FCT_NETWORK_NAME = "OpenFCT";
-const String OPEN_FCT_NETWORK_PASSWORD = "";
+
+//const String OPEN_FCT_NETWORK_NAME = "OpenFCT";
+//const String OPEN_FCT_NETWORK_PASSWORD = "";
 
 const String RUBEN_HOME_NETWORK_NAME = "MEO-50FDD6";
 const String RUBEN_HOME_NETWORK_PASSWORD = "6F137F7E95";
 
-const String RUBEN_MOBILE_HOTSPOT_NAME = "";
-const String RUBEN_MOBILE_HOTSPOT_PASSWORD = "";
+//const String RUBEN_MOBILE_HOTSPOT_NAME = "";
+//const String RUBEN_MOBILE_HOTSPOT_PASSWORD = "";
 
-// The Web Server
-const char WEB_SERVER[] = "https://firefighting-240516.appspot.com";
-
-// The Endpoint to register a sensor, using a @POST
-const char ENDPOINT_REGISTER[] = "/register/sensor";
-
-// The Endpoint to send reads/measuremenrs, using @PUT
-const char ENDPOINT_READ[] = "/sensor/read";
-
-// The Endpoint to send alerts, using @POST
-const char ENDPOINT_ALERT[] = "/sensor/alert";
-
-// The HTTP Status Codes
-/*const int httpStatusCodeOK = 200;
-const int httpStatusCodeNotFound = 404;
-const int httpStatusCodeInternalServerError = 500;*/
-
-#define TIME_HEADER "T"   // Header tag for serial time sync message
-#define TIME_REQUEST 7    // ASCII bell character requests a time sync message 
-
+// The Sensor's ID
+char sensorID[50];
+       
 void setup() {
-
   Serial.begin(115200);
 
   // The delay (5 seconds) needed
@@ -57,7 +39,6 @@ void setup() {
   WiFi.begin(RUBEN_HOME_NETWORK_NAME, RUBEN_HOME_NETWORK_PASSWORD);
   
   tryWiFiConnection();
-
 }
 
 void loop() {
@@ -67,168 +48,161 @@ void loop() {
    
   if( WiFi.status() == WL_CONNECTED ) {
     Serial.write(1);
-
-    WiFiClient client;
-  
-  const int httpPort = 80;
-
-  // Specify HTTP request destination
-  char serverPath[60];
-  sprintf(serverPath, "%s", WEB_SERVER);
-
-  char serverPathHost[80];
-  sprintf(serverPathHost, "Host: %s", serverPath);
-
-  char serverPathPost[80];
-  sprintf(serverPathPost, "POST %s HTTP/1.0", ENDPOINT_REGISTER);
-  
-  if (!client.connect(serverPath, httpPort)) {
-    Serial.println("Connection failed...");
-    return;
-  }
   
     String messageReceived = Serial.readString();
 
     Serial.println();
-    
-    char messageReceivedBuffer[60];
 
+    // Declare object of class HTTPClient
+    HTTPClient http;
+       
+    char messageReceivedBuffer[60];
     messageReceived.toCharArray(messageReceivedBuffer, 60);
     
     if(messageReceivedBuffer[0] == 'M') {
 
       // REGISTER ITSELF
       if(messageReceivedBuffer[1] == '0') {
-       char sensorID[50];
        
        sscanf(messageReceivedBuffer, "M0 - {[ %s ]}",
           &sensorID);
 
        Serial.println("Setting up the sensor with the ID:");
-       Serial.println(sensorID);
-
-       // Declare object of class HTTPClient
-       /*HTTPClient http;
-
+       Serial.println(sensorID);       
+       
        Serial.print("Sending a HTTP POST request to: ");
-       Serial.println(serverPath);
+       Serial.println("- http://firefighting-240516.appspot.com/register/sensor");
        
-       http.begin(serverPath);
-       http.header("POST / HTTP/1.0");
-
+       http.begin("http://firefighting-240516.appspot.com/register/sensor");
+       http.addHeader("Content-Type", "text/plain");
        
-       //http.header(serverPathHost);
-       */
-       //http.header("Accept: */*");
-       //http.header("Content-type: text/plain");
-
        // Send the HTTP request
-       /*int httpCode = http.POST(sensorID);
+       int httpCode = http.POST(sensorID);
        String payload = http.getString(); 
 
-       // Print HTTP request return code
-       Serial.println(httpCode);
+       if(httpCode == 200) {
+        Serial.println("HTTP Request Response Status Code: 200");
+        Serial.println("Sensor registered itself with success!!!");
+       }
+       else if(httpCode == 400) {
+        Serial.println("HTTP Request Response Status Code: 400");
+        Serial.println("Sensor already registered!!!");
+       }
+       else {
+        Serial.print("HTTP Request Response Status Code: ");
+        Serial.println(httpCode);
+        Serial.println("Some error occurred with the HTTP request!!!");
+       }
 
-       // Print HTTP request response payload
+       Serial.println("Payload of the HTTP Request Response:");
        Serial.println(payload);
-       
-       http.end();*/
-       
-       
-        client.println(serverPathPost);
-   client.println(serverPathHost);
-   //client.println("Accept: */*");
-   client.print("Content-Length: ");
-   client.println(sizeof(sensorID));
-   client.println("Content-Type: text/plain");
-   client.println();
-   client.print(sensorID);
-   delay(1000); // Can be changed
 
-  Serial.println("HTTP Response:");
-    while(client.available()){
-      String line = client.readStringUntil('\r');
-      Serial.print(line);
-      
-    // I will neeed to filter the headers, but first I want to be able to write to TempGraph anything
-
-    }
-
-  
-  if (client.connected()) { 
-    client.stop();  // DISCONNECT FROM THE SERVER
-  }
+       Serial.println();
+       
+       http.end();
       }
       
-      // IDLE ALERT
+      // MEASUREMENT/READING
       if(messageReceivedBuffer[1] == '1') {
+        int temperatureDHTMeasuredValue;
+        int humidityDHTMeasuredValue;
+         
+        sscanf(messageReceivedBuffer, "M1 - {[Temperature = %d; Humidity = %d}}",
+               &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
+  
+        Serial.println("Received a Measurement/Reading from the Sensor...");
+        Serial.print("INFO: {Temperature = ");
+        Serial.print(temperatureDHTMeasuredValue);
+        Serial.print("; Humidity = ");
+        Serial.print(humidityDHTMeasuredValue);
+        Serial.println("}");
 
-       int flameSensorMeasuredValue;
-       int temperatureDHTMeasuredValue;
-       int humidityDHTMeasuredValue;
+        Serial.println("Measurement/Reading from the Sensor's ID:");
+        Serial.println(sensorID);       
        
-       sscanf(messageReceivedBuffer, "M1 - {[Flame's IR = %d; Temperature = %d; Humidity = %d}}",
-          &flameSensorMeasuredValue, &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
-
-       Serial.println("Received an IDLE ALERT...");
-       Serial.print("INFO: {Flame's IR = ");
-       Serial.print(flameSensorMeasuredValue);
-       Serial.print("; Temperature = ");
-       Serial.print(temperatureDHTMeasuredValue);
-       Serial.print("; Humidity = ");
-       Serial.print(humidityDHTMeasuredValue);
-       Serial.println("}");
-
+        Serial.print("Sending a HTTP PUT request to: ");
+        Serial.println("- http://firefighting-240516.appspot.com/sensor/read");
        
+        http.begin("http://firefighting-240516.appspot.com/sensor/read");
+        http.addHeader("Content-Type", "text/plain");
+
+        char sensorMeasurement[80];
+        sprintf(sensorMeasurement, "%s %d %d", sensorID, temperatureDHTMeasuredValue, humidityDHTMeasuredValue); 
+        
+        // Send the HTTP request
+        int httpCode = http.PUT(sensorMeasurement);
+        String payload = http.getString();
+        
+       if(httpCode == 200) {
+        Serial.println("HTTP Request Response Status Code: 200");
+        Serial.println("Sensor's Measurement/Reading registered with success!!!");
+       }
+       else if(httpCode == 400) {
+        Serial.println("HTTP Request Response Status Code: 400");
+        Serial.println("Sensor don't registered or don't exist!!!");
+       }
+       else {
+        Serial.print("HTTP Request Response Status Code: ");
+        Serial.println(httpCode);
+        Serial.println("Some error occurred with the HTTP request!!!");
+       }
+
+       Serial.println("Payload of the HTTP Request Response:");
+       Serial.println(payload);
+
+       Serial.println();
+       
+       http.end();
       }
-
-      // YELLOW ALERT
-      if(messageReceivedBuffer[1] == '2') {
-
-       int temperatureDHTMeasuredValue;
-       int humidityDHTMeasuredValue;
-       
-       sscanf(messageReceivedBuffer, "M2 - {[Temperature = %d; Humidity = %d}}",
-          &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
-          
-       Serial.println(temperatureDHTMeasuredValue);
-       Serial.println(humidityDHTMeasuredValue);
-      }
-
-      // ORANGE ALERT
-      if(messageReceivedBuffer[1] == '3') {
-
-       int temperatureDHTMeasuredValue;
-       int humidityDHTMeasuredValue;
-       
-       sscanf(messageReceivedBuffer, "M3 - {[Temperature = %d; Humidity = %d}}",
-          &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
-          
-       Serial.println(temperatureDHTMeasuredValue);
-       Serial.println(humidityDHTMeasuredValue);
-      }
-
-      // RED ALERT
-      if(messageReceivedBuffer[1] == '4') {
-
-       int temperatureDHTMeasuredValue;
-       int humidityDHTMeasuredValue;
-       
-       sscanf(messageReceivedBuffer, "M4 - {[Temperature = %d; Humidity = %d}}",
-          &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
-          
-       Serial.println(temperatureDHTMeasuredValue);
-       Serial.println(humidityDHTMeasuredValue);
-      }
-
+  
       // FIRE ALERT
-      if(messageReceivedBuffer[1] == '5') {
-       int flameSensorMeasuredValue;
+      if(messageReceivedBuffer[1] == '2') {
+        int flameSensorMeasuredValue;
+         
+        sscanf(messageReceivedBuffer, "M2 - {[Flame's IR = %d]}",
+               &flameSensorMeasuredValue);
+               
+        Serial.println("Received a Fire Alert from the Sensor...");
+        Serial.print("INFO: {Flame's IR = ");
+        Serial.print(flameSensorMeasuredValue);
+        Serial.println("}");
+
+        Serial.println("Fire Alert from the Sensor's ID:");
+        Serial.println(sensorID);       
        
-       sscanf(messageReceivedBuffer, "M5 - {[Flame's IR = %d]}",
-          &flameSensorMeasuredValue);
-          
-       Serial.println(flameSensorMeasuredValue);
+        Serial.print("Sending a HTTP POST request to: ");
+        Serial.println("- http://firefighting-240516.appspot.com/sensor/alert");
+       
+        http.begin("http://firefighting-240516.appspot.com/sensor/alert");
+        http.addHeader("Content-Type", "text/plain");
+
+        char sensorFireAlert[40];
+        sprintf(sensorFireAlert, "%s", sensorID); 
+        
+        // Send the HTTP request
+        int httpCode = http.POST(sensorFireAlert);
+        String payload = http.getString();
+        
+       if(httpCode == 200) {
+        Serial.println("HTTP Request Response Status Code: 200");
+        Serial.println("Sensor's Fire Alert registered with success!!!");
+       }
+       else if(httpCode == 400) {
+        Serial.println("HTTP Request Response Status Code: 400");
+        Serial.println("Sensor don't registered or don't exist!!!");
+       }
+       else {
+        Serial.print("HTTP Request Response Status Code: ");
+        Serial.println(httpCode);
+        Serial.println("Some error occurred with the HTTP request!!!");
+       }
+
+       Serial.println("Payload of the HTTP Request Response:");
+       Serial.println(payload);
+
+       Serial.println();
+       
+       http.end();
       }
     }  
   }
@@ -237,11 +211,9 @@ void loop() {
       retryWiFiConnection();
     } 
   }
-  
 }
 
 void tryWiFiConnection() {
-  
   Serial.println();
   
   Serial.print("CONNECTING TO THE WIFI NETWORK: '");
@@ -264,8 +236,7 @@ void tryWiFiConnection() {
   Serial.println();
   
   Serial.print("Connected to the Local IP Address: ");
-  Serial.println(WiFi.localIP());
-  
+  Serial.println(WiFi.localIP()); 
 }
 
 void retryWiFiConnection() {
@@ -294,71 +265,3 @@ void retryWiFiConnection() {
   Serial.print("Connected to the Local IP Address: ");
   Serial.println(WiFi.localIP());
 }
-
-
-
-     /*if(WiFi.status()== WL_CONNECTED) {
-
-         HTTPClient httpClient;   
-
-         if(firstReading) {
-          setupSensorData();
-          firstReading = false;
-         }
-         else {
-          updateSensorData();
-         }
-
-         
-         // Start the resources from the HTTP Client
-         // Specify the IP Address for the destination for the HTTP request
-         httpClient.begin("localhost:8080/sensor/"); // TODO mudar
-
-         // Specify the content-type header for th HTTP request
-         httpClient.addHeader("Content-Type", "text/plain");
-         //httpClient.addHeader("Content-Type", "application/json");
-
-         // Send the actual HTTP POST request
-         int httpResponseCode = httpClient.POST("POSTING from ESP32"); // TODO mudar
-
-         // Verify the HTTP Status Code of the response to the HTTP request
-         if(httpResponseCode > 0) {
-            
-            // Get the response to the HTTP request
-            String response = http.getString();
-
-            // The HTTP Status Code of the response to the HTTP request:
-            // - 200 OK 
-            if(httpResponseCode == httpStatusCodeOK) {
-              // TODO
-            }
-            // The HTTP Status Code of the response to the HTTP request:
-            // - 404 OK 
-            else if(httpResponseCode == httpStatusCodeNotFound) {
-              // TODO
-            }
-            // The HTTP Status Code of the response to the HTTP request:
-            // - 500 OK 
-            else if(httpResponseCode == httpStatusCodeInternalServerError) {
-              // TODO
-            }
-            
-            Serial.println(httpResponseCode);   //Print return code
-            Serial.println(response);           //Print request answer
-        }
-        else {
-          Serial.print("Error on sending the HTTP POST request: ");
-          Serial.println(httpResponseCode);
-        }
-
-        // Free and terminate the resources from the HTTP Client
-        httpClient.end();
-  }
-  else{
-    Serial.println("Error in WiFi connection!!!");   
-  }
-  
-  // Try to measure the sensor's measures and reading parameters and
-  // send the HTTP POST request with that reading values,
-  // continuously for every 10 seconds
-  delay(10000);*/
