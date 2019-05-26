@@ -12,86 +12,8 @@
  * 
  */
 
-//#include <ESP8266WiFi.h>
-
 #include <SoftwareSerial.h>
 #include "dht.h"
-
-const String SENSOR_ID = "fire-fighting-sensor-00";
-//const String SENSOR_ID = "fire-fighting-sensor-" + random(10);
-
-const int IDLE_SUCCESS_CONNECTION_STATUS_1 = 1;
-const int IDLE_SUCCESS_CONNECTION_STATUS_2 = 51; 
-
-
-// The Ports of Pins in use, in this sensor's node:
-
-// The Analog Pin
-// on the Arduino that the positive lead of
-// Flame Sensor is attached
-// for Flames' detection and measures
-const int FLAME_PIN = A0;
-
-// The Digital Pin
-// on the Arduino that the positive lead of 
-// Piezo Buzzer is attached
-const int PIEZO_PIN = 6;
-
-// The Digital Pin
-// on the Arduino that the positive lead of
-// DHT Sensor is attached
-// for Humidity and Temperature measures
-const int DHT11_PIN = 7;
-
-// The Digital Pin
-// on the Arduino that the positive lead of
-// RGB LED is attached
-const int RED_PIN = 9;
-const int GREEN_PIN = 10;
-const int BLUE_PIN = 11;
-
-const int temperatureDHTYellowAlertThreshold = 35;
-const int temperatureDHTOrangeAlertThreshold = 40;
-const int temperatureDHTRedAlertThreshold = 45;
-
-const String MSG_FIRE_ALERT = "FIRE ALERT!!! MAYDAY, MAYDAY, MAYDAY!!!";
-
-const String MSG_FIRE_ALERT_CURRENT_DATA_MEASURED_FLAME_SENSOR_1 = "FIRE ALERT - ";
-const String MSG_CURRENT_DATA_MEASURED_FLAME_SENSOR_1 = "Current Data Measured: [Flame Intensity = ";
-const String MSG_CURRENT_DATA_MEASURED_FLAME_SENSOR_2 = "]";
-
-const String MSG_RED_ALERT = "RED ALERT - IMMINENT OCCURENCE OF FIRE ALERT!!!";
-const String MSG_ORANGE_ALERT = "ORANGE ALERT - VERY POSSIBLE OCCURENCE OF FIRE ALERT!!!";
-const String MSG_YELLOW_ALERT = "YELLOW ALERT - POSSIBLE OCCURENCE OF FIRE ALERT!!!";
-const String MSG_IDLE_STATUS = "IDLE STATUS - READING...";
-
-const String MSG_YELLOW_ALERT_CURRENT_DATA_MEASURED_DHT_SENSOR_1 = "YELLOW ALERT - ";
-const String MSG_ORANGE_ALERT_CURRENT_DATA_MEASURED_DHT_SENSOR_1 = "ORANGE ALERT - ";
-const String MSG_RED_ALERT_CURRENT_DATA_MEASURED_DHT_SENSOR_1 = "RED ALERT - ";
-
-const String MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_1 = "Current Data Measured: [Temperature = ";
-const String MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_2 = "; Humidity = ";
-const String MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_3 = "]";
-
-const String MSG_REGISTER_ITSELF_INFO_1 = "Sensor's Registration Info: [";
-const String MSG_REGISTER_ITSELF_INFO_2 = "]";
-const String MSG_REGISTER_ITSELF_INFO_3 = "SENDING SENSOR'S REGISTRATION INFO...";
-
-const String MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_1 = "Data Measurement/Reading: [";
-const String MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_2 = "]";
-const String MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_3 = "SENDING FLAME MEASUREMENT/READING...";
-
-const String MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_1 = "Data Measurement/Reading: [";
-const String MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_2 = " , ";
-const String MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_3 = "]";
-const String MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_4 = "SENDING DHT MEASUREMENT/READING...";
-
-const unsigned long TIME_TO_SEND_FIRE_ALERT = 5000;
-const unsigned long TIME_TO_SEND_YELLOW_ALERT = 7200000;
-const unsigned long TIME_TO_SEND_ORANGE_ALERT = 3600000;
-const unsigned long TIME_TO_SEND_RED_ALERT = 1800000;
-const unsigned long TIME_TO_SEND_MEASUREMENT_OR_READING = 18000000;
-
 
 dht DHT;
 
@@ -102,24 +24,26 @@ unsigned long timeSinceLastSendingFireAlert;
 unsigned long timeSinceLastSendingYellowAlert;
 unsigned long timeSinceLastSendingOrangeAlert;
 unsigned long timeSinceLastSendingRedAlert;
-unsigned long timeSinceLastSendingMeasurementOrReading;
+unsigned long timeSinceLastSendingIdleAlert;
 
-int lastFlameSensorMeasuredValue = 0;
-int lastTemperatureDHTMeasuredValue = 0;
-int lastHumidityDHTMeasuredValue = 0;
+int lastFlameSensorMeasuredValue;
+int lastTemperatureDHTMeasuredValue;
+int lastHumidityDHTMeasuredValue;
 
 int flameSensorThreshold;
 
+bool reconnectingWiFiState;
+
 void setup() {
   
-  pinMode(RED_PIN, OUTPUT);
-  pinMode(GREEN_PIN, OUTPUT);
-  pinMode(BLUE_PIN, OUTPUT);
+  pinMode(9, OUTPUT);
+  pinMode(10, OUTPUT);
+  pinMode(11, OUTPUT);
   
   Serial.begin(9600);
   fireFightingSensorSerial.begin(115200);
   
-  lastFlameSensorMeasuredValue = analogRead(FLAME_PIN);
+  lastFlameSensorMeasuredValue = analogRead(A0);
 
   if(lastFlameSensorMeasuredValue == 0) {
     flameSensorThreshold = 20;
@@ -128,307 +52,307 @@ void setup() {
     flameSensorThreshold = 120;
   }
     
-  DHT.read11(DHT11_PIN);
+  DHT.read11(7);
   lastTemperatureDHTMeasuredValue = DHT.temperature;
   lastHumidityDHTMeasuredValue = DHT.humidity;
 
-  delay(4000);
+  reconnectingWiFiState = false;
+  
+  while(!fireFightingSensorSerial.available()) {
+    connectionWiFiAlert();
+    
+    delay(2000);
+    Serial.print(".");
+  }
+    
   sendRegisterItselfInfo();
 
   timeSinceLastSendingFireAlert = 0;
   timeSinceLastSendingYellowAlert = 0;
   timeSinceLastSendingOrangeAlert = 0;
   timeSinceLastSendingRedAlert = 0;
-  timeSinceLastSendingMeasurementOrReading = 0;
+  timeSinceLastSendingIdleAlert = 0;
   
 }
 
 void loop() {
-
   if(fireFightingSensorSerial.available()) {
-    delay(600);
+    delay(1000);
 
     tryToDetectFire();
     
     byte byteReceived = fireFightingSensorSerial.read();
     
-    if( (byteReceived == IDLE_SUCCESS_CONNECTION_STATUS_1) || (byteReceived == IDLE_SUCCESS_CONNECTION_STATUS_2) ) {
-      performMeasurementsOrReadings();
+    if(byteReceived == 0) {
+      if(!reconnectingWiFiState) {
+       // Check WiFi connection status
+       reconnectingWiFiState = true;    
+      }
+      else {
+        delay(1000);
+        Serial.print(".");
+      }
+      
+      connectionWiFiAlert();
     }
     else {
-      // Check WiFi connection status
-      connectingWiFiState();
+      reconnectingWiFiState = false;
+      performMeasurementsOrReadings();
     }
   }
-
 }
 
 void tryToDetectFire() {
-  
-  int flameSensorMeasuredValue = analogRead(FLAME_PIN);
+  int flameSensorMeasuredValue = analogRead(A0);
  
   while(flameSensorMeasuredValue > flameSensorThreshold) {
-    
-    Serial.println(MSG_FIRE_ALERT);
-  
-    Serial.print(MSG_CURRENT_DATA_MEASURED_FLAME_SENSOR_1);
+    Serial.print("Current Data Measured: [Flame's IR = ");
     Serial.print(flameSensorMeasuredValue);
-    Serial.println(MSG_CURRENT_DATA_MEASURED_FLAME_SENSOR_2);
+    Serial.println("]");
     
-    verifySendAlertMsg(0, flameSensorMeasuredValue, 0, 0);
+    verifySendAlertMsg(5, flameSensorMeasuredValue, 0, 0);
 
     fireAlert();
     
-    flameSensorMeasuredValue = analogRead(FLAME_PIN);
+    flameSensorMeasuredValue = analogRead(A0);
   }
   
   turnOffAlert();
-
 }
 
 void performMeasurementsOrReadings() {
-   
-  int checkDHTMeasuredValue = DHT.read11(DHT11_PIN);
+
+  int flameSensorMeasuredValue = analogRead(A0);
+  
+  int checkDHTMeasuredValue = DHT.read11(7);
   int temperatureDHTMeasuredValue = DHT.temperature;
   int humidityDHTMeasuredValue = DHT.humidity;
   
-  if( (temperatureDHTMeasuredValue >= temperatureDHTRedAlertThreshold) || ( (lastTemperatureDHTMeasuredValue >= temperatureDHTRedAlertThreshold) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
-   Serial.println(MSG_RED_ALERT);
-
-   Serial.print(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_1);
+  if( (temperatureDHTMeasuredValue >= 45) || ( (lastTemperatureDHTMeasuredValue >= 45) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
+   Serial.print("Current Data Measured: [Temperature = ");
    Serial.print(temperatureDHTMeasuredValue);
-   Serial.println(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_2);
+   Serial.print("; Humidity = ");
    Serial.print(humidityDHTMeasuredValue);
-   Serial.println(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_3);
+   Serial.println("]");
 
-   verifySendAlertMsg(3, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
+   verifySendAlertMsg(4, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
    
    imminentOccurrenceFireAlert();   
   }
-  else if( (temperatureDHTMeasuredValue >= temperatureDHTOrangeAlertThreshold) || ( (lastTemperatureDHTMeasuredValue >= temperatureDHTOrangeAlertThreshold) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
-    Serial.println(MSG_ORANGE_ALERT);
+  else if( (temperatureDHTMeasuredValue >= 40) || ( (lastTemperatureDHTMeasuredValue >= 40) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
+   Serial.print("Current Data Measured: [Temperature = ");
+   Serial.print(temperatureDHTMeasuredValue);
+   Serial.print("; Humidity = ");
+   Serial.print(humidityDHTMeasuredValue);
+   Serial.println("]");
+   
+   verifySendAlertMsg(3, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
+    
+   veryPossibleOccurrenceFireAlert();
+  }
+  else if( (temperatureDHTMeasuredValue >= 35) || ( (lastTemperatureDHTMeasuredValue >= 35) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
+    Serial.print("Current Data Measured: [Temperature = ");
+    Serial.print(temperatureDHTMeasuredValue);
+    Serial.print("; Humidity = ");
+    Serial.print(humidityDHTMeasuredValue);
+    Serial.println("]");
 
     verifySendAlertMsg(2, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
-    
-    veryPossibleOccurrenceFireAlert();
-  }
-  else if( (temperatureDHTMeasuredValue >= temperatureDHTYellowAlertThreshold) || ( (lastTemperatureDHTMeasuredValue >= temperatureDHTYellowAlertThreshold) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
-    Serial.println(MSG_YELLOW_ALERT);
-
-    verifySendAlertMsg(1, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
     
     possibleOccurrenceFireAlert();
   }
   else {
-    Serial.println(MSG_IDLE_STATUS);
-
-    verifySendAlertMsg(4, 0, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
+    Serial.print("Current Data Measured: [Flame's IR = ");
+    Serial.print(flameSensorMeasuredValue);
+    Serial.print("; Temperature = ");
+    Serial.print(temperatureDHTMeasuredValue);
+    Serial.print("; Humidity = ");
+    Serial.print(humidityDHTMeasuredValue);
+    Serial.println("]");    
     
-    idleState();
+    verifySendAlertMsg(1, flameSensorMeasuredValue, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
+    
+    idleStateAlert();
   }
-
-  // Just for debug
-  Serial.print(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_1);
-  Serial.print(temperatureDHTMeasuredValue);
-  Serial.print(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_2);
-  Serial.print(humidityDHTMeasuredValue);
-  Serial.println(MSG_CURRENT_DATA_MEASURED_DHT_SENSOR_3);
 
   lastTemperatureDHTMeasuredValue = temperatureDHTMeasuredValue;
   lastHumidityDHTMeasuredValue = humidityDHTMeasuredValue;
 
   delay(200);
-
 }
 
 void sendRegisterItselfInfo() {
+  char registerItselfInfoMsgToSend[50];
   
-  String registerItselfInfoMsgToSend = MSG_REGISTER_ITSELF_INFO_1 + SENSOR_ID + MSG_REGISTER_ITSELF_INFO_2;
+  sprintf(registerItselfInfoMsgToSend, "M%d - {[ fire-fighting-sensor-00 ]}", 0); 
+           
+  Serial.println("SENDING SENSOR'S REGISTRATION INFO...");
 
-  Serial.print(MSG_REGISTER_ITSELF_INFO_3);
-  
-  sendDataStringToWiFiModule(0, registerItselfInfoMsgToSend);
-
+  fireFightingSensorSerial.write(registerItselfInfoMsgToSend);
 }
 
 void verifySendAlertMsg(int alertType, int flameSensorMeasuredValue, int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
 
-  // FIRE ALERT
-  if(alertType == 0) {
-    long timeOfFireAlertOccurrence = 0;
+  // IDLE ALERT
+  if(alertType == 1) {
+    long timeOfIdleAlertOccurrence = 0;
 
-    timeOfFireAlertOccurrence = millis() - timeSinceLastSendingFireAlert;
+    timeOfIdleAlertOccurrence = millis() - timeSinceLastSendingIdleAlert;
 
-    if(timeOfFireAlertOccurrence > TIME_TO_SEND_FIRE_ALERT) {
-      sendFireAlert(flameSensorMeasuredValue);
-      timeSinceLastSendingFireAlert = millis();
+    if(timeOfIdleAlertOccurrence > 60000) {
+      sendIdleAlert(flameSensorMeasuredValue, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
+      timeSinceLastSendingIdleAlert = millis();
     }
   }
 
   // YELLOW ALERT
-  if(alertType == 1) {
+  if(alertType == 2) {
     long timeOfYellowAlertOccurrence = 0;
 
     timeOfYellowAlertOccurrence = millis() - timeSinceLastSendingYellowAlert;
 
-    if(timeOfYellowAlertOccurrence > TIME_TO_SEND_YELLOW_ALERT) {
+    if(timeOfYellowAlertOccurrence > 7200000) {
       sendYellowAlert(temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
       timeSinceLastSendingYellowAlert = millis();
     }
   }
 
   // ORANGE ALERT
-  if(alertType == 2) {
+  if(alertType == 3) {
     long timeOfOrangeAlertOccurrence = 0;
 
     timeOfOrangeAlertOccurrence = millis() - timeSinceLastSendingOrangeAlert;
 
-    if(timeOfOrangeAlertOccurrence > TIME_TO_SEND_ORANGE_ALERT) {
+    if(timeOfOrangeAlertOccurrence > 3600000) {
       sendOrangeAlert(temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
       timeSinceLastSendingOrangeAlert = millis();
     }
   }
 
   // RED ALERT
-  if(alertType == 3) {
+  if(alertType == 4) {
     long timeOfRedAlertOccurrence = 0;
 
     timeOfRedAlertOccurrence = millis() - timeSinceLastSendingRedAlert;
 
-    if(timeOfRedAlertOccurrence > TIME_TO_SEND_RED_ALERT) {
+    if(timeOfRedAlertOccurrence > 1800000) {
       sendRedAlert(temperatureDHTMeasuredValue, humidityDHTMeasuredValue);
       timeSinceLastSendingRedAlert = millis();
     }
   }
 
-  // IDLE ALERT
-  if(alertType == 4) {
+  // FIRE ALERT
+  if(alertType == 5) {
     
+    long timeOfFireAlertOccurrence = 0;
+
+    timeOfFireAlertOccurrence = millis() - timeSinceLastSendingFireAlert;
+
+    if(timeOfFireAlertOccurrence > 5000) {
+      sendFireAlert(flameSensorMeasuredValue);
+      timeSinceLastSendingFireAlert = millis();
+    }
   }
 }
 
-void sendFireAlert(int flameSensorMeasuredValue) {
+void sendIdleAlert(int flameSensorMeasuredValue, int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
   
-  String fireAlertMsgToSend = MSG_FIRE_ALERT_CURRENT_DATA_MEASURED_FLAME_SENSOR_1 + 
-                              MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_1 + 
-                              String(flameSensorMeasuredValue) + 
-                              MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_2;
-
-  Serial.print(MSG_CURRENT_FLAME_MEASUREMENT_READING_TO_SEND_3);
+  char idleAlertMsgToSend[50];
   
-  sendDataStringToWiFiModule(1, fireAlertMsgToSend);
-
+  sprintf(idleAlertMsgToSend, "M%d - {[Flame's IR = %d; Temperature = %d; Humidity = %d}}",
+          1, flameSensorMeasuredValue, temperatureDHTMeasuredValue, humidityDHTMeasuredValue); 
+  
+  fireFightingSensorSerial.write(idleAlertMsgToSend);
 }
 
 void sendYellowAlert(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
-  
-  String yellowAlertMsgToSend = MSG_YELLOW_ALERT_CURRENT_DATA_MEASURED_DHT_SENSOR_1 + 
-                                MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_1 + 
-                                String(temperatureDHTMeasuredValue) + 
-                                MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_2 + 
-                                String(humidityDHTMeasuredValue) + 
-                                MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_3;
 
-  Serial.print(MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_4);
+  char yellowAlertMsgToSend[50];
   
-  sendDataStringToWiFiModule(2, yellowAlertMsgToSend);
+  sprintf(yellowAlertMsgToSend, "M%d - {[Temperature = %d; Humidity = %d]}",
+          2, temperatureDHTMeasuredValue, humidityDHTMeasuredValue); 
+           
+  Serial.println("SENDING YELLOW ALERT...");
 
+  fireFightingSensorSerial.write(yellowAlertMsgToSend);
 }
 
 void sendOrangeAlert(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
   
-  String orangeAlertMsgToSend = MSG_ORANGE_ALERT_CURRENT_DATA_MEASURED_DHT_SENSOR_1 + 
-                                MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_1 + 
-                                String(temperatureDHTMeasuredValue) + 
-                                MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_2 + 
-                                String(humidityDHTMeasuredValue) + 
-                                MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_3;
-
-  Serial.print(MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_4);
+  char orangeAlertMsgToSend[50];
   
-  sendDataStringToWiFiModule(3, orangeAlertMsgToSend);
+  sprintf(orangeAlertMsgToSend, "M%d - {[Temperature = %d; Humidity = %d]}",
+          3, temperatureDHTMeasuredValue, humidityDHTMeasuredValue); 
+           
+  Serial.println("SENDING ORANGE ALERT...");
 
+  fireFightingSensorSerial.write(orangeAlertMsgToSend);
 }
-
 
 void sendRedAlert(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
   
-  String redAlertMsgToSend = MSG_RED_ALERT_CURRENT_DATA_MEASURED_DHT_SENSOR_1 + 
-                                    MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_1 + 
-                                    String(temperatureDHTMeasuredValue) + 
-                                    MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_2 + 
-                                    String(humidityDHTMeasuredValue) + 
-                                    MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_3;
-
-  Serial.print(MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_4);
+  char redAlertMsgToSend[50];
   
-  sendDataStringToWiFiModule(4, redAlertMsgToSend);
+  sprintf(redAlertMsgToSend, "M%d - {[Temperature = %d; Humidity = %d]}",
+          4, temperatureDHTMeasuredValue, humidityDHTMeasuredValue);  
+           
+  Serial.println("SENDING RED ALERT...");
 
+  fireFightingSensorSerial.write(redAlertMsgToSend);
 }
 
-void sendMeasurementOrReading(int temperatureDHTMeasuredValue, int humidityDHTMeasuredValue) {
-  
-  String measurementReadingMsgToSend = MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_1 + 
-                                       String(temperatureDHTMeasuredValue) + 
-                                       MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_2 + 
-                                       String(humidityDHTMeasuredValue) + 
-                                       MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_3;
 
-  Serial.print(MSG_CURRENT_DHT_MEASUREMENT_READING_TO_SEND_4);
-  
-  sendDataStringToWiFiModule(5, measurementReadingMsgToSend);
+void sendFireAlert(int flameSensorMeasuredValue) {
 
+  char fireAlertMsgToSend[50];
+  
+  sprintf(fireAlertMsgToSend, "M%d - {[Flame's IR = %d]}",
+          5, flameSensorMeasuredValue); 
+           
+  Serial.println("SENDING FIRE ALERT...");
+
+  fireFightingSensorSerial.write(fireAlertMsgToSend); 
 }
 
-void sendDataStringToWiFiModule(int messageType, String stringData) {
-
-  fireFightingSensorSerial.write(messageType);
-  
-  for(int i = 0; i < stringData.length(); i++) {
-    fireFightingSensorSerial.write(stringData[i]);
-  }
-  
-}
-
-void connectingWiFiState() {
+void connectionWiFiAlert() {
   
   // Blue (turn just the BLUE LED on):
-  digitalWrite(RED_PIN, LOW);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, HIGH);
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, HIGH);
 
-  tone(PIEZO_PIN, 1000, 10);
+  tone(6, 1000, 10);
 
   delay(50);
 
   // Off (all LEDs off):
-  digitalWrite(RED_PIN, LOW);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
     
-  tone(PIEZO_PIN, 1000, 10);
+  tone(6, 1000, 10);
 
   delay(50);
 
 }
 
-void idleState() {
+void idleStateAlert() {
   
   // Green (turn just the GREEN LED on):
-  digitalWrite(RED_PIN, LOW);
-  digitalWrite(GREEN_PIN, HIGH);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(10, HIGH);
+  digitalWrite(11, LOW);
 
-  tone(PIEZO_PIN, 100, 100);
+  tone(6, 100, 100);
 
   delay(2000);
 
   // Off (all LEDs off):
-  digitalWrite(RED_PIN, LOW);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
     
-  tone(PIEZO_PIN, 100, 100);
+  tone(6, 100, 100);
 
   delay(2000);
 
@@ -437,20 +361,20 @@ void idleState() {
 void possibleOccurrenceFireAlert() {
 
   // Yellow (turn just the GREEN and RED LED on):
-  digitalWrite(RED_PIN, HIGH);
-  digitalWrite(GREEN_PIN, HIGH);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, HIGH);
+  digitalWrite(10, HIGH);
+  digitalWrite(11, LOW);
 
-  tone(PIEZO_PIN, 100, 100);
+  tone(6, 100, 100);
 
   delay(600);
 
   // Off (all LEDs off):
-  digitalWrite(RED_PIN, LOW);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
     
-  tone(PIEZO_PIN, 100, 100);
+  tone(6, 100, 100);
 
   delay(600);
 
@@ -459,28 +383,28 @@ void possibleOccurrenceFireAlert() {
 void veryPossibleOccurrenceFireAlert() {
 
   // Orange (turn just the GREEN and RED LED on):
-  digitalWrite(RED_PIN, HIGH);
-  digitalWrite(GREEN_PIN, HIGH);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, HIGH);
+  digitalWrite(10, HIGH);
+  digitalWrite(11, LOW);
 
-  analogWrite(RED_PIN, 255);
-  analogWrite(GREEN_PIN, 30);
-  analogWrite(BLUE_PIN, 0);
+  analogWrite(9, 255);
+  analogWrite(10, 30);
+  analogWrite(11, 0);
   
-  tone(PIEZO_PIN, 100, 100);
+  tone(6, 100, 100);
 
   delay(200);
 
   // Off (all LEDs off):
-  digitalWrite(RED_PIN, LOW);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
 
-  analogWrite(RED_PIN, 0);
-  analogWrite(GREEN_PIN, 0);
-  analogWrite(BLUE_PIN, 0);
+  analogWrite(9, 0);
+  analogWrite(10, 0);
+  analogWrite(11, 0);
     
-  tone(PIEZO_PIN, 100, 100);
+  tone(6, 100, 100);
 
   delay(200);
 
@@ -489,20 +413,20 @@ void veryPossibleOccurrenceFireAlert() {
 void imminentOccurrenceFireAlert() {
   
   // Red (turn just the RED LED on):
-  digitalWrite(RED_PIN, HIGH);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, HIGH);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
 
-  tone(PIEZO_PIN, 100, 100);
+  tone(6, 100, 100);
 
   delay(100);
 
   // Off (all LEDs off):
-  digitalWrite(RED_PIN, LOW);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
     
-  tone(PIEZO_PIN, 100, 100);
+  tone(6, 100, 100);
 
   delay(100);
 
@@ -511,19 +435,19 @@ void imminentOccurrenceFireAlert() {
 void fireAlert() {
 
   // Red (turn just the red LED on):
-  digitalWrite(RED_PIN, HIGH);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, HIGH);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
 
-  tone(PIEZO_PIN, 10, 10000);
+  tone(6, 10, 10000);
 
 }
 
 void turnOffAlert() {
   
   // Off (all LEDs off):
-  digitalWrite(RED_PIN, LOW);
-  digitalWrite(GREEN_PIN, LOW);
-  digitalWrite(BLUE_PIN, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(10, LOW);
+  digitalWrite(11, LOW);
 
 }

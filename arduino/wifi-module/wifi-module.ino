@@ -13,7 +13,8 @@
  */
 
 #include <ESP8266WiFi.h>
-//#include <SPI.h>
+#include <ESP8266HTTPClient.h>
+
 #include <SoftwareSerial.h>
 
 // Some available Networks to test:
@@ -27,22 +28,16 @@ const String RUBEN_MOBILE_HOTSPOT_NAME = "";
 const String RUBEN_MOBILE_HOTSPOT_PASSWORD = "";
 
 // The Web Server
-const String WEB_SERVER = "https://firefighting-240516.appspot.com";
+const char WEB_SERVER[] = "https://firefighting-240516.appspot.com";
 
 // The Endpoint to register a sensor, using a @POST
-const String endpointRegister[] = "/register/sensor";
+const char ENDPOINT_REGISTER[] = "/register/sensor";
 
 // The Endpoint to send reads/measuremenrs, using @PUT
-const String endpointRead[] = "/sensor/read";
+const char ENDPOINT_READ[] = "/sensor/read";
 
 // The Endpoint to send alerts, using @POST
-const String endpointAlert[] = "/sensor/alert";
-
-// Messages to display in the Serial (115200 baud)
-const String MSG_CONNECTING_TO_THE_NETWORK = "Connecting to the Network: '";
-const String MSG_SUCCESSFUL_CONNECTED_TO_THE_NETWORK = "Successful connected to the Network: '";
-const String MSG_CONNECTED_IP_ADDRESS = "Connected, IP address: ";
-const String MSG_RECONNECTING_TO_THE_NETWORK = "Reconnecting to the Network: '";
+const char ENDPOINT_ALERT[] = "/sensor/alert";
 
 // The HTTP Status Codes
 /*const int httpStatusCodeOK = 200;
@@ -70,11 +65,172 @@ void loop() {
   // Check the Network status once every 6 seconds:
   delay(6000);
    
-  if( (WiFi.status() == WL_CONNECTED) ) {
+  if( WiFi.status() == WL_CONNECTED ) {
     Serial.write(1);
 
-    String a = Serial.read();
-    Serial.print(a);
+    WiFiClient client;
+  
+  const int httpPort = 80;
+
+  // Specify HTTP request destination
+  char serverPath[60];
+  sprintf(serverPath, "%s", WEB_SERVER);
+
+  char serverPathHost[80];
+  sprintf(serverPathHost, "Host: %s", serverPath);
+
+  char serverPathPost[80];
+  sprintf(serverPathPost, "POST %s HTTP/1.0", ENDPOINT_REGISTER);
+  
+  if (!client.connect(serverPath, httpPort)) {
+    Serial.println("Connection failed...");
+    return;
+  }
+  
+    String messageReceived = Serial.readString();
+
+    Serial.println();
+    
+    char messageReceivedBuffer[60];
+
+    messageReceived.toCharArray(messageReceivedBuffer, 60);
+    
+    if(messageReceivedBuffer[0] == 'M') {
+
+      // REGISTER ITSELF
+      if(messageReceivedBuffer[1] == '0') {
+       char sensorID[50];
+       
+       sscanf(messageReceivedBuffer, "M0 - {[ %s ]}",
+          &sensorID);
+
+       Serial.println("Setting up the sensor with the ID:");
+       Serial.println(sensorID);
+
+       // Declare object of class HTTPClient
+       /*HTTPClient http;
+
+       Serial.print("Sending a HTTP POST request to: ");
+       Serial.println(serverPath);
+       
+       http.begin(serverPath);
+       http.header("POST / HTTP/1.0");
+
+       
+       //http.header(serverPathHost);
+       */
+       //http.header("Accept: */*");
+       //http.header("Content-type: text/plain");
+
+       // Send the HTTP request
+       /*int httpCode = http.POST(sensorID);
+       String payload = http.getString(); 
+
+       // Print HTTP request return code
+       Serial.println(httpCode);
+
+       // Print HTTP request response payload
+       Serial.println(payload);
+       
+       http.end();*/
+       
+       
+        client.println(serverPathPost);
+   client.println(serverPathHost);
+   //client.println("Accept: */*");
+   client.print("Content-Length: ");
+   client.println(sizeof(sensorID));
+   client.println("Content-Type: text/plain");
+   client.println();
+   client.print(sensorID);
+   delay(1000); // Can be changed
+
+  Serial.println("HTTP Response:");
+    while(client.available()){
+      String line = client.readStringUntil('\r');
+      Serial.print(line);
+      
+    // I will neeed to filter the headers, but first I want to be able to write to TempGraph anything
+
+    }
+
+  
+  if (client.connected()) { 
+    client.stop();  // DISCONNECT FROM THE SERVER
+  }
+      }
+      
+      // IDLE ALERT
+      if(messageReceivedBuffer[1] == '1') {
+
+       int flameSensorMeasuredValue;
+       int temperatureDHTMeasuredValue;
+       int humidityDHTMeasuredValue;
+       
+       sscanf(messageReceivedBuffer, "M1 - {[Flame's IR = %d; Temperature = %d; Humidity = %d}}",
+          &flameSensorMeasuredValue, &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
+
+       Serial.println("Received an IDLE ALERT...");
+       Serial.print("INFO: {Flame's IR = ");
+       Serial.print(flameSensorMeasuredValue);
+       Serial.print("; Temperature = ");
+       Serial.print(temperatureDHTMeasuredValue);
+       Serial.print("; Humidity = ");
+       Serial.print(humidityDHTMeasuredValue);
+       Serial.println("}");
+
+       
+      }
+
+      // YELLOW ALERT
+      if(messageReceivedBuffer[1] == '2') {
+
+       int temperatureDHTMeasuredValue;
+       int humidityDHTMeasuredValue;
+       
+       sscanf(messageReceivedBuffer, "M2 - {[Temperature = %d; Humidity = %d}}",
+          &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
+          
+       Serial.println(temperatureDHTMeasuredValue);
+       Serial.println(humidityDHTMeasuredValue);
+      }
+
+      // ORANGE ALERT
+      if(messageReceivedBuffer[1] == '3') {
+
+       int temperatureDHTMeasuredValue;
+       int humidityDHTMeasuredValue;
+       
+       sscanf(messageReceivedBuffer, "M3 - {[Temperature = %d; Humidity = %d}}",
+          &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
+          
+       Serial.println(temperatureDHTMeasuredValue);
+       Serial.println(humidityDHTMeasuredValue);
+      }
+
+      // RED ALERT
+      if(messageReceivedBuffer[1] == '4') {
+
+       int temperatureDHTMeasuredValue;
+       int humidityDHTMeasuredValue;
+       
+       sscanf(messageReceivedBuffer, "M4 - {[Temperature = %d; Humidity = %d}}",
+          &temperatureDHTMeasuredValue, &humidityDHTMeasuredValue);
+          
+       Serial.println(temperatureDHTMeasuredValue);
+       Serial.println(humidityDHTMeasuredValue);
+      }
+
+      // FIRE ALERT
+      if(messageReceivedBuffer[1] == '5') {
+       int flameSensorMeasuredValue;
+       
+       sscanf(messageReceivedBuffer, "M5 - {[Flame's IR = %d]}",
+          &flameSensorMeasuredValue);
+          
+       Serial.println(flameSensorMeasuredValue);
+      }
+    }  
   }
   else {
     if( (WiFi.status() == WL_NO_SSID_AVAIL) || (WiFi.status() == WL_DISCONNECTED) || (WiFi.status() == WL_CONNECTION_LOST) ) {
@@ -88,8 +244,8 @@ void tryWiFiConnection() {
   
   Serial.println();
   
-  Serial.print(MSG_CONNECTING_TO_THE_NETWORK);
-  Serial.print(rubenHomeNetworkName);
+  Serial.print("CONNECTING TO THE WIFI NETWORK: '");
+  Serial.print(RUBEN_HOME_NETWORK_NAME);
   Serial.println("'...");
 
   Serial.println();
@@ -102,13 +258,12 @@ void tryWiFiConnection() {
 
   Serial.println();
   
-  Serial.print(MSG_SUCCESSFUL_CONNECTED_TO_THE_NETWORK);
-  Serial.print(rubenHomeNetworkName);
+  Serial.print("CONNECTED SUCCESSFUL TO THE WIFI NETWORK: '");
+  Serial.print(RUBEN_HOME_NETWORK_NAME);
   Serial.print("'!!!");
   Serial.println();
   
-  Serial.print(MSG_CONNECTED_IP_ADDRESS);
-  Serial.print("- ");
+  Serial.print("Connected to the Local IP Address: ");
   Serial.println(WiFi.localIP());
   
 }
@@ -117,8 +272,8 @@ void retryWiFiConnection() {
   
   Serial.println();
   
-  Serial.print(MSG_RECONNECTING_TO_THE_NETWORK);
-  Serial.print(rubenHomeNetworkName);
+  Serial.print("RECONNECTING TO THE WIFI NETWORK: '");
+  Serial.print(RUBEN_HOME_NETWORK_NAME);
   Serial.println("'...");
 
   Serial.println();
@@ -131,15 +286,13 @@ void retryWiFiConnection() {
   
   Serial.println();
   
-  Serial.print(MSG_SUCCESSFUL_CONNECTED_TO_THE_NETWORK);
-  Serial.print(rubenHomeNetworkName);
+  Serial.print("CONNECTED SUCCESSFUL TO THE WIFI NETWORK: '");
+  Serial.print(RUBEN_HOME_NETWORK_NAME);
   Serial.print("'!!!");
   Serial.println();
  
-  Serial.print(MSG_CONNECTED_IP_ADDRESS);
-  Serial.print("- ");
+  Serial.print("Connected to the Local IP Address: ");
   Serial.println(WiFi.localIP());
-  
 }
 
 
