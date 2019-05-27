@@ -18,8 +18,8 @@
 
 // Some available Networks to test:
 
-//const String OPEN_FCT_NETWORK_NAME = "OpenFCT";
-//const String OPEN_FCT_NETWORK_PASSWORD = "";
+const String OPEN_FCT_NETWORK_NAME = "OpenFCT";
+const String OPEN_FCT_NETWORK_PASSWORD = "";
 
 const String RUBEN_HOME_NETWORK_NAME = "MEO-50FDD6";
 const String RUBEN_HOME_NETWORK_PASSWORD = "6F137F7E95";
@@ -36,7 +36,7 @@ void setup() {
   // The delay (5 seconds) needed
   // before calling the WiFi.begin method
   delay(5000);
-  WiFi.begin(RUBEN_HOME_NETWORK_NAME, RUBEN_HOME_NETWORK_PASSWORD);
+  WiFi.begin(OPEN_FCT_NETWORK_NAME, OPEN_FCT_NETWORK_PASSWORD);
   
   tryWiFiConnection();
 }

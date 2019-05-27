@@ -118,26 +118,70 @@ void performMeasurementsOrReadings() {
   int checkDHTMeasuredValue = DHT.read11(7);
   int temperatureDHTMeasuredValue = DHT.temperature;
   int humidityDHTMeasuredValue = DHT.humidity;
-  
-  if( (temperatureDHTMeasuredValue >= 45) || ( (lastTemperatureDHTMeasuredValue >= 45) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
-   Serial.print("Current Data Measured: [Temperature = ");
-   Serial.print(temperatureDHTMeasuredValue);
-   Serial.print("; Humidity = ");
-   Serial.print(humidityDHTMeasuredValue);
-   Serial.println("]");
 
-   imminentOccurrenceFireAlert();   
+  // If the temperature is equal or greater than 45 degrees, it will be generated a RED alert or an ORANGE alert
+  if( (temperatureDHTMeasuredValue >= 45) || ( (lastTemperatureDHTMeasuredValue >= 45) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
+
+   // If the humidity is equal or greater than 40%, it will be generated an ORANGE alert
+   if( (humidityDHTMeasuredValue >= 40) || ( (lastHumidityDHTMeasuredValue >= 40) && ( (lastHumidityDHTMeasuredValue + humidityDHTMeasuredValue) < 0) ) ) {
+    Serial.print("Current Data Measured: [Temperature = ");
+    Serial.print(temperatureDHTMeasuredValue);
+    Serial.print("; Humidity = ");
+    Serial.print(humidityDHTMeasuredValue);
+    Serial.println("]");
+
+    veryPossibleOccurrenceFireAlert(); 
+   }
+   // If the humidity is less than 40%, it will be generated a RED alert
+   else {
+    Serial.print("Current Data Measured: [Temperature = ");
+    Serial.print(temperatureDHTMeasuredValue);
+    Serial.print("; Humidity = ");
+    Serial.print(humidityDHTMeasuredValue);
+    Serial.println("]");
+
+    imminentOccurrenceFireAlert(); 
+   }  
   }
+  // If the temperature is equal or greater than 40 degrees, it will be generated an ORANGE alert or a YELLOW alert
   else if( (temperatureDHTMeasuredValue >= 40) || ( (lastTemperatureDHTMeasuredValue >= 40) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
-   Serial.print("Current Data Measured: [Temperature = ");
-   Serial.print(temperatureDHTMeasuredValue);
-   Serial.print("; Humidity = ");
-   Serial.print(humidityDHTMeasuredValue);
-   Serial.println("]");
+   
+   // If the humidity is equal or greater than 40%, it will be generated an YELLOW alert
+   if( (humidityDHTMeasuredValue >= 40) || ( (lastHumidityDHTMeasuredValue >= 40) && ( (lastHumidityDHTMeasuredValue + humidityDHTMeasuredValue) < 0) ) ) {
+    Serial.print("Current Data Measured: [Temperature = ");
+    Serial.print(temperatureDHTMeasuredValue);
+    Serial.print("; Humidity = ");
+    Serial.print(humidityDHTMeasuredValue);
+    Serial.println("]");
      
-   veryPossibleOccurrenceFireAlert();
+    possibleOccurrenceFireAlert();
+   }
+   // If the humidity is less than 40%, it will be generated an ORANGE alert
+   else {
+    Serial.print("Current Data Measured: [Temperature = ");
+    Serial.print(temperatureDHTMeasuredValue);
+    Serial.print("; Humidity = ");
+    Serial.print(humidityDHTMeasuredValue);
+    Serial.println("]");
+     
+    veryPossibleOccurrenceFireAlert();
+   }
   }
+  // If the temperature is equal or greater than 35 degrees, it will be generated a YELLOW alert or no alert, at all
   else if( (temperatureDHTMeasuredValue >= 35) || ( (lastTemperatureDHTMeasuredValue >= 35) && ( (lastTemperatureDHTMeasuredValue + temperatureDHTMeasuredValue) < 0) ) ) {
+
+   // If the humidity is equal or greater than 40%, it will be generated no alert
+   if( (humidityDHTMeasuredValue >= 40) || ( (lastHumidityDHTMeasuredValue >= 40) && ( (lastHumidityDHTMeasuredValue + humidityDHTMeasuredValue) < 0) ) ) {
+    Serial.print("Current Data Measured: [Temperature = ");
+    Serial.print(temperatureDHTMeasuredValue);
+    Serial.print("; Humidity = ");
+    Serial.print(humidityDHTMeasuredValue);
+    Serial.println("]");
+    
+    idleState();
+   }
+   // If the humidity is less than 40%, it will be generated a YELLOW alert
+   else {
     Serial.print("Current Data Measured: [Temperature = ");
     Serial.print(temperatureDHTMeasuredValue);
     Serial.print("; Humidity = ");
@@ -145,6 +189,7 @@ void performMeasurementsOrReadings() {
     Serial.println("]");
 
     possibleOccurrenceFireAlert();
+   }
   }
   else {
     Serial.print("Current Data Measured: [Temperature = ");
