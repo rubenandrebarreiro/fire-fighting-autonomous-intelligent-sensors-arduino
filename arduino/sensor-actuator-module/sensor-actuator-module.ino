@@ -97,14 +97,20 @@ void loop() {
 
 void tryToDetectFire() {
   int flameSensorMeasuredValue = analogRead(A0);
- 
+
+  bool detectingFire = false;
+  
   while(flameSensorMeasuredValue > flameSensorThreshold) {
     Serial.print("Current Data Measured: [Flame's IR = ");
     Serial.print(flameSensorMeasuredValue);
     Serial.println("]");
-    
-    verifySendAlertMsg(2, flameSensorMeasuredValue, 0, 0);
 
+    if(!detectingFire) {
+      verifySendAlertMsg(2, flameSensorMeasuredValue, 0, 0);  
+    }
+
+    detectingFire = true;
+    
     fireAlert();
     
     flameSensorMeasuredValue = analogRead(A0);
