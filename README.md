@@ -1,6 +1,11 @@
 ## Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires
 
-###  (Arduino Sensor/Actuator with WiFi Component)
+###  (Arduino Sensor - Actuator with WiFi Component)
+
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/banner-1.jpg](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/banner-1.jpg)
+###### Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires (Arduino Sensor - Actuator with WiFi Component) - Banner #1
+
+***
 
 ## Current Status
 
@@ -83,7 +88,7 @@ git clone git@github.com:rubenandrebarreiro/fire-fighting-autonomous-intelligent
 
 > Bernardo Palma Albergaria
 
-> [Eduardo Brás Silva](https://github.com/timeforagame/)
+> [Eduardo Manuel Silva](https://github.com/timeforagame/)
 
 > [Rúben André Barreiro](https://github.com/rubenandrebarreiro/)
 
