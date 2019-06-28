@@ -65,7 +65,7 @@
 
 ***
 
-![https://raw.githubusercontent.com/rubenandrebarreiro/gpu-cuda-self-organising-maps/master/imgs/JPGs/screenshot-2.jpg](https://raw.githubusercontent.com/rubenandrebarreiro/gpu-cuda-self-organising-maps/master/imgs/JPGs/screenshot-2.jpg)
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-2.jpg](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-2.jpg)
 ######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires (Arduino Sensor - Actuator with WiFi Component) - Screenshot #2
 
 ***
