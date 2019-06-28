@@ -85,6 +85,31 @@
 ######  (Arduino Sensor - Actuator with WiFi Component) - Live Demo #2
 
 ***
+
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/live-demos/GIFs/live-demo-3.gif](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/live-demos/GIFs/live-demo-3.gif)
+######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires 
+######  (Arduino Sensor - Actuator with WiFi Component) - Live Demo #3
+
+***
+
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/live-demos/GIFs/live-demo-4.gif](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/live-demos/GIFs/live-demo-4.gif)
+######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires 
+######  (Arduino Sensor - Actuator with WiFi Component) - Live Demo #4
+
+***
+
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/live-demos/GIFs/live-demo-5.gif](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/live-demos/GIFs/live-demo-5.gif)
+######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires 
+######  (Arduino Sensor - Actuator with WiFi Component) - Live Demo #5
+
+***
+
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/live-demos/GIFs/live-demo-6.gif](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/live-demos/GIFs/live-demo-6.gif)
+######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires 
+######  (Arduino Sensor - Actuator with WiFi Component) - Live Demo #6
+
+***
+
 ## Getting Started
 
 ### Prerequisites
