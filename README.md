@@ -4,6 +4,7 @@
 
 ## Current Status
 
+[![contributor for this repository](https://img.shields.io/badge/contributor-bernardo&nbspPalma&nbsp;Albergaria-blue.svg)]()
 [![contributor for this repository](https://img.shields.io/badge/contributor-timeforagame-blue.svg)](https://github.com/timeforagame/)
 [![contributor for this repository](https://img.shields.io/badge/contributor-rubenandrebarreiro-blue.svg)](https://github.com/rubenandrebarreiro/) [![developed in](https://img.shields.io/badge/developed&nbsp;in-fct&nbsp;nova-blue.svg)](https://www.fct.unl.pt/)
 [![current version](https://img.shields.io/badge/version-1.0-magenta.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
@@ -14,10 +15,10 @@
 [![status of this version no. 4](https://img.shields.io/badge/status-documented-orange.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
 
 
-[![keyword of this version no. 1](https://img.shields.io/badge/keyword-high&nbsp;performance&nbsp;computing-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
-[![keyword of this version no. 2](https://img.shields.io/badge/keyword-neural&nbsp;networks-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
-[![keyword of this version no. 3](https://img.shields.io/badge/keyword-som-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
-[![keyword of this version no. 4](https://img.shields.io/badge/keyword-cuda-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![keyword of this version no. 1](https://img.shields.io/badge/keyword-sensorse&nbsp;computing-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![keyword of this version no. 2](https://img.shields.io/badge/keyword-web&nbsp;server-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![keyword of this version no. 3](https://img.shields.io/badge/keyword-mobile&nbsp;app-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![keyword of this version no. 4](https://img.shields.io/badge/keyword-ubiquituous&nbsp;computing-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
 
 [![technology used no. 1](https://img.shields.io/badge/built&nbsp;with-cuda-red.svg)](https://developer.nvidia.com/cuda-zone) 
 [![technology used no. 2](https://img.shields.io/badge/built&nbsp;with-c++-red.svg)](http://www.cplusplus.com/) 
