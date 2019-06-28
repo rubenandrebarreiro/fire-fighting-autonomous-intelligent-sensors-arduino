@@ -56,6 +56,8 @@
 [Click here to see the Project's Description!](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/project-description/PDFs/project-description-1.pdf)
 ######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires (Arduino Sensor - Actuator with WiFi Component) - Project's Description #1
 
+***
+
 ## Getting Started
 
 ### Prerequisites
