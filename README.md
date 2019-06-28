@@ -25,8 +25,8 @@
 [![technology used no. 4](https://img.shields.io/badge/built&nbsp;with-cmake-red.svg)](https://cmake.org/) 
 [![software used no. 1](https://img.shields.io/badge/software-jetbrains&nbsp;clion-gold.svg)](https://www.jetbrains.com/clion/)
 
-[![star this repository](http://githubbadges.com/star.svg?user=rubenandrebarreiro&repo=fire-fighting-autonomous-intelligent-sensors-arduinos&style=flat)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/stargazers)
-[![fork this repository](http://githubbadges.com/fork.svg?user=rubenandrebarreiro&repo=fire-fighting-autonomous-intelligent-sensors-arduin&style=flat)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/fork)
+[![star this repository](http://githubbadges.com/star.svg?user=rubenandrebarreiro&repo=fire-fighting-autonomous-intelligent-sensors-arduino&style=flat)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/stargazers)
+[![fork this repository](http://githubbadges.com/fork.svg?user=rubenandrebarreiro&repo=fire-fighting-autonomous-intelligent-sensors-arduino&style=flat)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/fork)
 [![downloads of this repository](https://img.shields.io/github/downloads/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/total.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/archive/master.zip)
 [![price of this project](https://img.shields.io/badge/price-free-success.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/archive/master.zip)
 
