@@ -2,6 +2,43 @@
 
 ###  (Arduino Sensor/Actuator with WiFi Component)
 
+## Current Status
+
+[![contributor for this repository](https://img.shields.io/badge/contributor-timeforagame-blue.svg)](https://github.com/timeforagame/)
+[![contributor for this repository](https://img.shields.io/badge/contributor-rubenandrebarreiro-blue.svg)](https://github.com/rubenandrebarreiro/) [![developed in](https://img.shields.io/badge/developed&nbsp;in-fct&nbsp;nova-blue.svg)](https://www.fct.unl.pt/)
+[![current version](https://img.shields.io/badge/version-1.0-magenta.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+
+[![status of this version no. 1](https://img.shields.io/badge/status-completed-orange.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![status of this version no. 2](https://img.shields.io/badge/status-final-orange.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![status of this version no. 3](https://img.shields.io/badge/status-stable-orange.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino)
+[![status of this version no. 4](https://img.shields.io/badge/status-documented-orange.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+
+
+[![keyword of this version no. 1](https://img.shields.io/badge/keyword-high&nbsp;performance&nbsp;computing-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![keyword of this version no. 2](https://img.shields.io/badge/keyword-neural&nbsp;networks-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![keyword of this version no. 3](https://img.shields.io/badge/keyword-som-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![keyword of this version no. 4](https://img.shields.io/badge/keyword-cuda-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+
+[![technology used no. 1](https://img.shields.io/badge/built&nbsp;with-cuda-red.svg)](https://developer.nvidia.com/cuda-zone) 
+[![technology used no. 2](https://img.shields.io/badge/built&nbsp;with-c++-red.svg)](http://www.cplusplus.com/) 
+[![technology used no. 3](https://img.shields.io/badge/built&nbsp;with-c-red.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
+[![technology used no. 4](https://img.shields.io/badge/built&nbsp;with-cmake-red.svg)](https://cmake.org/) 
+[![software used no. 1](https://img.shields.io/badge/software-jetbrains&nbsp;clion-gold.svg)](https://www.jetbrains.com/clion/)
+
+[![star this repository](http://githubbadges.com/star.svg?user=rubenandrebarreiro&repo=fire-fighting-autonomous-intelligent-sensors-arduinos&style=flat)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/stargazers)
+[![fork this repository](http://githubbadges.com/fork.svg?user=rubenandrebarreiro&repo=fire-fighting-autonomous-intelligent-sensors-arduin&style=flat)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/fork)
+[![downloads of this repository](https://img.shields.io/github/downloads/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/total.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/archive/master.zip)
+[![price of this project](https://img.shields.io/badge/price-free-success.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/archive/master.zip)
+
+##### Current Progress of the Project
+
+[![current progress of this project](http://progressed.io/bar/80?title=&nbsp;completed&nbsp;)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/) 
+
+##### Final Approval Grade of the Project
+
+[![grade of this project](http://progressed.io/bar/16?scale=20&title=&nbsp;grade&nbsp;&suffix=&nbsp;)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+
+
 ### Prerequisites
 To install and run this application, you will need:
 > The [**_Git_**](https://git-scm.com/) feature and/or a [**_third-party Git Client based GUI_**](https://git-scm.com/downloads/guis/), like:
