@@ -4,7 +4,7 @@
 
 ## Current Status
 
-[![contributor for this repository](https://img.shields.io/badge/contributor-bernardo&nbspPalma&nbsp;Albergaria-blue.svg)]()
+[![contributor for this repository](https://img.shields.io/badge/contributor-bernardo&nbspPalma&nbsp;Albergaria-blue.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino)
 [![contributor for this repository](https://img.shields.io/badge/contributor-timeforagame-blue.svg)](https://github.com/timeforagame/)
 [![contributor for this repository](https://img.shields.io/badge/contributor-rubenandrebarreiro-blue.svg)](https://github.com/rubenandrebarreiro/) [![developed in](https://img.shields.io/badge/developed&nbsp;in-fct&nbsp;nova-blue.svg)](https://www.fct.unl.pt/)
 [![current version](https://img.shields.io/badge/version-1.0-magenta.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
@@ -81,7 +81,7 @@ git clone git@github.com:rubenandrebarreiro/fire-fighting-autonomous-intelligent
 
 ## Contributors
 
-> [Bernardo Palma Albergaria]()
+> Bernardo Palma Albergaria
 
 > [Eduardo Brás Silva](https://github.com/timeforagame/)
 
