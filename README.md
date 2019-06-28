@@ -15,16 +15,17 @@
 [![status of this version no. 4](https://img.shields.io/badge/status-documented-orange.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
 
 
-[![keyword of this version no. 1](https://img.shields.io/badge/keyword-sensorse&nbsp;computing-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
+[![keyword of this version no. 1](https://img.shields.io/badge/keyword-sensors&nbsp;computing-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
 [![keyword of this version no. 2](https://img.shields.io/badge/keyword-web&nbsp;server-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
 [![keyword of this version no. 3](https://img.shields.io/badge/keyword-mobile&nbsp;app-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
 [![keyword of this version no. 4](https://img.shields.io/badge/keyword-ubiquituous&nbsp;computing-brown.svg)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/)
 
-[![technology used no. 1](https://img.shields.io/badge/built&nbsp;with-cuda-red.svg)](https://developer.nvidia.com/cuda-zone) 
+[![technology used no. 1](https://img.shields.io/badge/built&nbsp;with-arduino-red.svg)](https://www.arduino.cc/) 
 [![technology used no. 2](https://img.shields.io/badge/built&nbsp;with-c++-red.svg)](http://www.cplusplus.com/) 
-[![technology used no. 3](https://img.shields.io/badge/built&nbsp;with-c-red.svg)](https://en.wikipedia.org/wiki/C_(programming_language))
-[![technology used no. 4](https://img.shields.io/badge/built&nbsp;with-cmake-red.svg)](https://cmake.org/) 
-[![software used no. 1](https://img.shields.io/badge/software-jetbrains&nbsp;clion-gold.svg)](https://www.jetbrains.com/clion/)
+[![technology used no. 3](https://img.shields.io/badge/built&nbsp;with-java-red.svg)](https://www.java.come))
+[![technology used no. 4](https://img.shields.io/badge/built&nbsp;with-google&nbsp;app&nbsp;engine-red.svg)](https://cmake.org/) 
+[![software used no. 1](https://img.shields.io/badge/software-arduinonbsp;ide-gold.svg)](https://cloud.google.com/appengine/)
+[![software used no. 2](https://img.shields.io/badge/software-jetbrains&nbsp;clion-gold.svg)](https://cloud.google.com/appengine/)
 
 [![star this repository](http://githubbadges.com/star.svg?user=rubenandrebarreiro&repo=fire-fighting-autonomous-intelligent-sensors-arduino&style=flat)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/stargazers)
 [![fork this repository](http://githubbadges.com/fork.svg?user=rubenandrebarreiro&repo=fire-fighting-autonomous-intelligent-sensors-arduino&style=flat)](https://github.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/fork)
