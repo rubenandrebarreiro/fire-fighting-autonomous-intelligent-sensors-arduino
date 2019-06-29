@@ -94,6 +94,14 @@
 
 ***
 
+## Schematic of Arduino Uno's Sketch
+
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/sketch-schematic-1.jpg](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/sketch-schematic-1.jpg)
+######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires 
+######  (Arduino Sensor - Actuator with WiFi Component) - Schematic of Arduino Uno's Sketch
+
+***
+
 ## Getting Started
 
 ### Prerequisites
