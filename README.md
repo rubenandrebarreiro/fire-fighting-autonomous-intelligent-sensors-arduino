@@ -61,14 +61,16 @@
 ## Screenshots
 
 ![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-1.jpg](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-1.jpg)
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-3.jpg](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-3.jpg)
+![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-9.jpg](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-9.jpg)
+
 ######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires 
-######  (Arduino Sensor - Actuator with WiFi Component) - Screenshot #1
+######  (Arduino Sensor - Actuator with WiFi Component) - Screenshots (Part 1)
 
 ***
 
-![https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-2.jpg](https://raw.githubusercontent.com/rubenandrebarreiro/fire-fighting-autonomous-intelligent-sensors-arduino/master/imgs/JPGs/screenshot-2.jpg)
 ######  Fire Fighting - Autonomous and Intelligent Sensors in the Fight against Forest Fires 
-######  (Arduino Sensor - Actuator with WiFi Component) - Screenshot #2
+######  (Arduino Sensor - Actuator with WiFi Component) - Screenshots (Part 2)
 
 ***
 
